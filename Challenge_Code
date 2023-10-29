@@ -1,0 +1,93 @@
+Sub Challenge()
+    ' Defining Variables
+    Dim ws As Worksheet
+    Dim LastRow As Long
+    Dim SPrice As Double
+    Dim EPrice As Double
+    Dim YChange As Double
+    Dim PChange As Double
+    Dim TSV As Double
+    Dim MaxTot As Double
+    Dim LowPer As Double
+    Dim GrePer As Double
+    Dim GrePerNam As String
+    Dim i As Long
+    Dim o As Long
+    Dim p As Long
+    Dim WTick As Long
+    Dim Tick As String
+    Dim ticker As String
+    ' Loop through all worksheets in the workbook
+    For Each ws In ThisWorkbook.Worksheets
+        LastRow = ws.Cells(Rows.Count, 1).End(xlUp).Row
+        WTick = 2
+        TSV = 0
+        MaxTot = 0
+        LowPer = 0
+        GrePer = 0
+        SPrice = 0
+        ' Headers
+        ws.Cells(1, 9).Value = "Ticker"
+        ws.Cells(1, 10).Value = "Yearly Change"
+        ws.Cells(1, 11).Value = "Percentage Change"
+        ws.Cells(1, 12).Value = "Total Stock Volume"
+        ws.Cells(1, 16).Value = "Ticker"
+        ws.Cells(1, 17).Value = "Value"
+        ws.Cells(2, 15).Value = "Greatest % Increase"
+        ws.Cells(3, 15).Value = "Greatest % Decrease"
+        ws.Cells(4, 15).Value = "Greatest Total Volume"
+        For i = 2 To LastRow
+            If ws.Cells(i + 1, 1).Value <> ws.Cells(i, 1).Value Then
+                EPrice = ws.Cells(i, 6).Value
+                Tick = ws.Cells(i, 1).Value
+                YChange = EPrice - SPrice
+                If SPrice <> 0 Then
+                    PChange = (YChange / SPrice)
+                Else
+                    PChange = 0
+                End If
+                TSV = TSV + ws.Cells(i, 7).Value
+                ws.Range("I" & WTick).Value = Tick
+                ws.Range("J" & WTick).Value = YChange
+                If YChange > 0 Then
+                    ws.Range("J" & WTick).Interior.ColorIndex = 4
+                Else
+                ws.Range("J" & WTick).Interior.ColorIndex = 3
+                End If
+                ws.Range("K" & WTick).Value = PChange
+                ws.Range("K" & WTick).NumberFormat = "0.00%"
+                ws.Range("L" & WTick).Value = TSV
+                WTick = WTick + 1
+                TSV = 0
+                SPrice = 0
+            Else
+                TSV = TSV + ws.Cells(i, 7).Value
+                If SPrice = 0 Then
+                    SPrice = ws.Cells(i, 3).Value
+                End If
+            End If
+        Next i
+        ' Top Results
+        For o = 2 To LastRow
+            If ws.Cells(o, 12).Value > ws.Cells(4, 17).Value Then
+                MaxTot = ws.Cells(o, 12).Value
+                ws.Cells(4, 16).Value = ws.Cells(o, 9).Value
+                ws.Cells(4, 17).Value = ws.Cells(o, 12).Value
+            End If
+            If ws.Cells(o, 11).Value < ws.Cells(3, 17).Value Then
+                LowPer = ws.Cells(o, 11).Value
+                ws.Cells(3, 16).Value = ws.Cells(o, 9).Value
+                ws.Cells(3, 17).Value = ws.Cells(o, 11).Value
+                ws.Cells(3, 17).NumberFormat = "0.00%"
+            End If
+            If ws.Cells(o, 11).Value > ws.Cells(2, 17).Value Then
+                GrePer = ws.Cells(o, 11).Value
+                GrePerNam = ws.Cells(o, 9).Value
+                ws.Cells(2, 16).Value = GrePerNam
+                ws.Cells(2, 17).Value = GrePer
+                ws.Cells(2, 17).NumberFormat = "0.00%"
+            End If
+        Next o
+        ws.Columns("J:Q").AutoFit
+    Next ws
+End Sub
